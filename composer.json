@@ -1,14 +1,14 @@
 {
-    "name": "ets/payment-dotpay-bundle",
+    "name": "immersivelabs/payment-mes-bundle",
     "type": "symfony-bundle",
-    "description": "Payment Bundle providing access to the Dotpay API",
-    "keywords": ["payment", "dotpay"],
-    "homepage": "https://github.com/ETSGlobal/ETSPaymentDotpayBundle",
-    "license": "Apache2",
+    "description": "Payment Bundle providing access to the MeS API",
+    "keywords": ["payment", "mes"],
+    "homepage": "https://github.com/immersivelabs/PaymentMeSBundle",
+    "license": "MIT",
     "authors": [
         {
-            "name": "Clément Gautier",
-            "email": "clement.gautier@sensiolabs.com"
+            "name": "Luis Cordova",
+            "email": "cordoval@gmail.com"
         }
     ],
     "require": {
@@ -20,7 +20,7 @@
         "symfony/browser-kit": "2.1.x-dev"
     },
     "autoload": {
-        "psr-0": { "ETS\\Payment\\DotpayBundle": "" }
+        "psr-0": { "ImmersiveLabs\\PaymentMeSBundle": "" }
     },
-    "target-dir": "ETS/Payment/DotpayBundle"
+    "target-dir": "ImmersiveLabs/PaymentMeSBundle"
 }
