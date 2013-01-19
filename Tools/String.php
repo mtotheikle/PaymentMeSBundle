@@ -1,6 +1,6 @@
 <?php
 
-namespace ETS\Payment\DotpayBundle\Tools;
+namespace ImmersiveLabs\PaymentMeSBundle;
 
 /**
  * String tools
