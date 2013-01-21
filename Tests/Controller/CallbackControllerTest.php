@@ -1,11 +1,11 @@
 <?php
 
-namespace ETS\PurchaseBundle\Tests\Controller;
+namespace ImmersiveLabs\PaymentMeSBundle\Tests;
 
 use JMS\Payment\CoreBundle\Model\PaymentInstructionInterface;
 
-use ETS\Payment\DotpayBundle\Test\ContainerAwareWebTestCase;
-use ETS\Payment\DotpayBundle\Plugin\DotpayDirectPlugin;
+use ImmersiveLabs\PaymentMeSBundle\Test\ContainerAwareWebTestCase;
+use ImmersiveLabs\PaymentMeSBundle\Plugin\MeSPlugin;
 
 use JMS\Payment\CoreBundle\Plugin\Exception\ActionRequiredException;
 use JMS\Payment\CoreBundle\PluginController\Result;

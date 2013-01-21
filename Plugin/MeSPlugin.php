@@ -1,6 +1,6 @@
 <?php
 
-namespace ImmersiveLabs\BillingBundle\Service;
+namespace ImmersiveLabs\PaymentMeSBundle\Plugin;
 
 use JMS\Payment\CoreBundle\Plugin\AbstractPlugin;
 
