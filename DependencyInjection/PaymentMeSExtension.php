@@ -27,7 +27,8 @@ class PaymentMeSExtension extends Extension
         $xmlLoader = new XmlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
         $xmlLoader->load('services.xml');
 
-        $container->setParameter('payment.mes.id', $config['id']);
-        $container->setParameter('payment.mes.return_url', $config['return_url']);
+        $container->setParameter('payment.mes.pg_profile_id', $config['pg_profile_id']);
+        $container->setParameter('payment.mes.pg_profile_key', $config['pg_profile_key']);
+        $container->setParameter('payment.mes.pg_host', $config['pg_host']);
     }
 }

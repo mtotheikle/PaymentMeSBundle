@@ -121,7 +121,7 @@ class CallbackControllerTest extends ContainerAwareWebTestCase
             'amount' => 42.00,
             'email' => 'clement.gautier.76@gmail.com',
             'description' => 'Test transaction',
-            't_status' => DotpayDirectPlugin::STATUS_NEW,
+            't_status' => MeSPlugin::STATUS_NEW,
             'code' => '',
             'service' => '',
             'md5' => md5(sprintf(
@@ -129,7 +129,7 @@ class CallbackControllerTest extends ContainerAwareWebTestCase
                 $this->getContainer()->getParameter('payment.dotpay.direct.pin'),
                 $this->getContainer()->getParameter('payment.dotpay.direct.id'),
                 '', '424242-TST1', 42.00, 'clement.gautier.76@gmail.com',
-                '', '', '', '', DotpayDirectPlugin::STATUS_NEW
+                '', '', '', '', MeSPlugin::STATUS_NEW
             ))
         ));
 

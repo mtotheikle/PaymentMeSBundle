@@ -4,34 +4,17 @@
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
 
-    <parameters>
-        <parameter key="payment.plugin.dotpay_direct.class">ImmersiveLabs\PaymentMeSBundle\Plugin\MeSPlugin</parameter>
-        <parameter key="payment.form.dotpay_direct_type.class">ImmersiveLabs\PaymentMeSBundle\Form\MeSType</parameter>
-        <parameter key="payment.dotpay.client.token.class">ETS\Payment\DotpayBundle\Client\Token</parameter>
-    </parameters>
-
     <services>
-        <service id="payment.dotpay.client.token" class="%payment.dotpay.client.token.class%">
-            <argument>%payment.dotpay.direct.id%</argument>
-            <argument>%payment.dotpay.direct.pin%</argument>
-        </service>
-
-        <service id="payment.plugin.dotpay_direct" class="%payment.plugin.dotpay_direct.class%">
-            <argument type="service" id="router"/>
-            <argument type="service" id="payment.dotpay.client.token"/>
-            <argument>%payment.dotpay.direct.url%</argument>
-            <argument>%payment.dotpay.direct.type%</argument>
-            <argument>%payment.dotpay.direct.return_url%</argument>
-            <tag name="payment.plugin" />
-        </service>
-
         <service id="payment.plugin.mes" class="ImmersiveLabs\PaymentMeSBundle\Plugin\MeSPlugin">
+            <argument>%payment.mes.pg_profile_id%</argument>
+            <argument>%payment.mes.pg_profile_key%</argument>
+            <argument>%payment.mes.pg_host%</argument>
             <tag name="payment.plugin" />
         </service>
 
-        <service id="payment.form.dotpay_direct_type" class="%payment.form.dotpay_direct_type.class%">
+        <service id="payment.form.mes_type" class="ImmersiveLabs\PaymentMeSBundle\Form\MeSType">
             <tag name="payment.method_form_type" />
-            <tag name="form.type" alias="dotpay_direct" />
+            <tag name="form.type" alias="payment_mes" />
         </service>
     </services>
 </container>
