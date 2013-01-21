@@ -1,6 +1,6 @@
 <?php
 
-namespace ETS\Payment\DotpayBundle\DependencyInjection;
+namespace ImmersiveLabs\PaymentMeSBundle\DependencyInjection;
 
 use Symfony\Component\HttpKernel\DependencyInjection\Extension;
 use Symfony\Component\Config\FileLocator;
@@ -12,7 +12,7 @@ use Symfony\Component\DependencyInjection\ContainerBuilder;
  * Bundle Extension class
  *
  */
-class ETSPaymentDotpayExtension extends Extension
+class PaymentMeSExtension extends Extension
 {
     /**
      * @param array            $configs   The configuration
@@ -27,10 +27,7 @@ class ETSPaymentDotpayExtension extends Extension
         $xmlLoader = new XmlFileLoader($container, new FileLocator(__DIR__.'/../Resources/config'));
         $xmlLoader->load('services.xml');
 
-        $container->setParameter('payment.dotpay.direct.id', $config['direct']['id']);
-        $container->setParameter('payment.dotpay.direct.pin', $config['direct']['pin']);
-        $container->setParameter('payment.dotpay.direct.url', $config['direct']['url']);
-        $container->setParameter('payment.dotpay.direct.type', $config['direct']['type']);
-        $container->setParameter('payment.dotpay.direct.return_url', $config['direct']['return_url']);
+        $container->setParameter('payment.mes.id', $config['id']);
+        $container->setParameter('payment.mes.return_url', $config['return_url']);
     }
 }
