@@ -18,7 +18,7 @@ class Configuration implements ConfigurationInterface
         $treeBuilder = new TreeBuilder();
 
         return $treeBuilder
-            ->root('payment_mes_bundle')
+            ->root('payment_me_s')
                 ->children()
                     ->scalarNode('pg_profile_id')
                         ->isRequired()
