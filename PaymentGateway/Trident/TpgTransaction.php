@@ -23,13 +23,14 @@ class TpgTransaction
         "bml_request", "promo_code", "order_num", "order_desc", "amount", "ship_amount", "ip_address", "bill_first_name", "bill_middle_name", "bill_last_name", "bill_addr1", "bill_addr2", "bill_city", "bill_state", "bill_zip", "bill_phone1", "bill_phone2", "bill_email", "ship_first_name", "ship_middle_name", "ship_last_name", "ship_addr1", "ship_addr2", "ship_city", "ship_state", "ship_zip", "ship_phone1", "ship_phone2", "ship_email");
     var $url;
 
-    function TpgTransaction($profileId = '', $profileKey = '')
+    function __construct($profileId = '', $profileKey = '')
     {
         $this->setProfile($profileId, $profileKey);
     }
 
     function execute()
     {
+        $url = "";
         if ($this->isValid()) {
             $url .= "profile_id=" . $this->ProfileId;
             $url .= "&profile_key=" . $this->ProfileKey;

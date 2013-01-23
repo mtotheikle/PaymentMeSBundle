@@ -4,9 +4,9 @@ namespace ImmersiveLabs\PaymentMeSBundle\PaymentGateway\Trident;
 
 class TpgRefund extends TpgTransaction
 {
-    function TpgRefund($profileId, $profileKey, $tranId)
+    function __construct($profileId, $profileKey, $tranId)
     {
-        $this->TpgTransaction($profileId, $profileKey);
+        parent::__construct($profileId, $profileKey);
         $this->RequestFields['transaction_id'] = $tranId;
         $this->TranType = "U";
     }

@@ -4,9 +4,9 @@ namespace ImmersiveLabs\PaymentMeSBundle\PaymentGateway\Trident;
 
 class TpgVoid extends TpgTransaction
 {
-    function TpgVoid($profileId, $profileKey, $tranId)
+    function __construct($profileId, $profileKey, $tranId)
     {
-        $this->TpgTransaction($profileId, $profileKey);
+        parent::__construct($profileId, $profileKey);
         $this->RequestFields['transaction_id'] = $tranId;
         $this->TranType = "V";
     }

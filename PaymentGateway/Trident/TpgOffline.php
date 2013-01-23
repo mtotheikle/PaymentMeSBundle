@@ -4,9 +4,9 @@ namespace ImmersiveLabs\PaymentMeSBundle\PaymentGateway\Trident;
 
 class TpgOffline extends TpgTransaction
 {
-    function TpgOffline($profileId, $profileKey, $authCode)
+    function __construct($profileId, $profileKey, $authCode)
     {
-        $this->TpgTransaction($profileId, $profileKey);
+        parent::__construct($profileId, $profileKey);
         $this->RequestFields['auth_code'] = $authCode;
         $this->TranType = "O";
     }

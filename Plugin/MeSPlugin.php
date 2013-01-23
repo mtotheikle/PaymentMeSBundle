@@ -4,23 +4,17 @@ namespace ImmersiveLabs\PaymentMeSBundle\Plugin;
 
 use JMS\Payment\CoreBundle\Model\FinancialTransactionInterface;
 use JMS\Payment\CoreBundle\Plugin\AbstractPlugin;
+use JMS\Payment\CoreBundle\Entity\ExtendedData;
+use JMS\Payment\CoreBundle\Entity\Payment;
 
 class MeSPlugin extends AbstractPlugin
 {
-    protected $pgProfileId;
-    protected $pgProfileKey;
-    protected $pgHost;
+    /** @var \ImmersiveLabs\PaymentMeSBundle\Client\MeSClient */
+    protected $client;
 
-    /**
-     * @param string $pgProfileId
-     * @param string $pgProfileKey
-     * @param string $pgHost
-     */
-    public function __construct($pgProfileId, $pgProfileKey, $pgHost)
+    public function __construct($client)
     {
-        $this->pgProfileId = $pgProfileId;
-        $this->pgProfileKey = $pgProfileKey;
-        $this->pgHost = $pgHost;
+        $this->client = $client;
     }
 
     public function processes($name)
@@ -36,71 +30,45 @@ class MeSPlugin extends AbstractPlugin
      */
     public function approveAndDeposit(FinancialTransactionInterface $transaction, $retry)
     {
-        $this->setUniqueReferenceNumber($transaction);
-        $amount = $transaction->getRequestedAmount();
-//        $data   = $this->convertExtendedData($transaction->getExtendedData());
+        $data = $this->convertExtendedData($transaction->getExtendedData());
+        /** @var \JMS\Payment\CoreBundle\Entity\Payment $payment */
+        $payment = $transaction->getPayment();
 
-//        $response = $this->client->requestCapture($transaction->getReferenceNumber(), $amount, $data);
-//        $this->setData($transaction, $response);
-//        $this->throwUnlessSuccessResponse($response, $transaction);
+        $response = $this->client->postSale($data['cardNumber'], $data['expirationMonth'], $data['expirationYear'], $payment->getApprovingAmount());
 
-        $transaction->setProcessedAmount($amount);
+        if ($response === false) {
+            return $transaction->setResponseCode(static::REASON_CODE_INVALID);
+        }
+
+        $transaction->setProcessedAmount($payment->getApprovingAmount());
+        $transaction->setReferenceNumber($response);
         $transaction->setReasonCode(static::REASON_CODE_SUCCESS);
         $transaction->setResponseCode(static::RESPONSE_CODE_SUCCESS);
     }
 
-    /**
-     * Sets a unique reference number if one is not already set.
-     *
-     * @param \JMS\Payment\CoreBundle\Model\FinancialTransactionInterface $transaction
-     */
-    protected function setUniqueReferenceNumber(FinancialTransactionInterface $transaction)
+    public function convertExtendedData(ExtendedData $extendedData)
     {
-        if (null === $transaction->getReferenceNumber()) {
-            $transaction->setReferenceNumber(uniqid('FTI'));
-        }
+        return array(
+            'cardNumber'      => $extendedData->get('cardNumber'),
+            'expirationMonth' => $extendedData->get('expirationMonth'),
+            'expirationYear'  => $extendedData->get('expirationYear'),
+            'cvv'             => $extendedData->get('cvv')
+        );
     }
 
-    /**
-     * This method executes an approve transaction.
-     *
-     * By an approval, funds are reserved but no actual money is transferred. A
-     * subsequent deposit transaction must be performed to actually transfer the
-     * money.
-     *
-     * A typical use case, would be Credit Card payments where funds are first
-     * authorized.
-     *
-     * @param FinancialTransactionInterface $transaction The transaction
-     * @param boolean                       $retry       Retry
-     */
-    public function approve(FinancialTransactionInterface $transaction, $retry)
+
+    private function generateInvoiceNumber($length = 10)
     {
-        $data = $transaction->getExtendedData();
+        $base = array_merge(range(0, 9), range('a', 'z'), range('A', 'Z'));
+        shuffle($base);
 
-        switch ($data->get('t_status')) {
-            case self::STATUS_NEW:
-                // TODO: The status should not be NEW at this point, I think
-                // we should throw an Exception that trigger the PENDING state
-            case self::STATUS_COMPLAINT:
-                // TODO: What is this status ? should we deal with it ?
-            case self::STATUS_DONE:
-            case self::STATUS_CLOSED:
-            case self::STATUS_REFUND:
-            case self::STATUS_REJECTED:
-                break;
+        $invoiceNumber = '';
 
-            default:
-                $ex = new FinancialException('Payment status unknow: '.$data->get('t_status'));
-                $ex->setFinancialTransaction($transaction);
-                $transaction->setResponseCode('Unknown');
-
-                throw $ex;
+        while (strlen($invoiceNumber) < $length) {
+            $invoiceNumber .= $base[array_rand($base)];
+            shuffle($base);
         }
 
-        $transaction->setReferenceNumber($data->get('t_id'));
-        $transaction->setProcessedAmount($data->get('amount'));
-        $transaction->setResponseCode(PluginInterface::RESPONSE_CODE_SUCCESS);
-        $transaction->setReasonCode(PluginInterface::REASON_CODE_SUCCESS);
+        return $invoiceNumber;
     }
 }

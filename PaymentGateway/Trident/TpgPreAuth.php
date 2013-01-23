@@ -4,9 +4,9 @@ namespace ImmersiveLabs\PaymentMeSBundle\PaymentGateway\Trident;
 
 class TpgPreAuth extends TpgTransaction
 {
-    function TpgPreAuth($profileId = '', $profileKey = '')
+    function __construct($profileId = '', $profileKey = '')
     {
-        $this->TpgTransaction($profileId, $profileKey);
+        parent::__construct($profileId, $profileKey);
         $this->TranType = "P"; // pre-auth
     }
 

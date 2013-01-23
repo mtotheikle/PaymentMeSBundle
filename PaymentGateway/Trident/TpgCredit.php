@@ -4,9 +4,9 @@ namespace ImmersiveLabs\PaymentMeSBundle\PaymentGateway\Trident;
 
 class TpgCredit extends TpgTransaction
 {
-    function TpgCredit($profileId, $profileKey)
+    function __construct($profileId, $profileKey)
     {
-        $this->TpgTransaction($profileId, $profileKey);
+        parent::__construct($profileId, $profileKey);
         $this->TranType = "C";
     }
 

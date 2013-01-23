@@ -4,9 +4,9 @@ namespace ImmersiveLabs\PaymentMeSBundle\PaymentGateway\Trident;
 
 class TpgRemoveData extends TpgTransaction
 {
-    function TpgRemoveData($profileId, $profileKey, $cardId)
+    function __construct($profileId, $profileKey, $cardId)
     {
-        $this->TpgTransaction($profileId, $profileKey);
+        parent::__construct($profileId, $profileKey);
         $this->RequestFields['card_id'] = $cardId;
         $this->TranType = "X";
     }

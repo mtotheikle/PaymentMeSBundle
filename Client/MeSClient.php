@@ -2,6 +2,8 @@
 
 namespace ImmersiveLabs\PaymentMeSBundle\Client;
 
+use ImmersiveLabs\PaymentMeSBundle\PaymentGateway\Trident;
+
 class MeSClient
 {
     protected $profileId;
@@ -10,47 +12,21 @@ class MeSClient
 
     public function __construct($auth)
     {
-        $this->profileId = $auth['profileId'];
-        $this->profileKey = $auth['profileKey'];
-        $this->apiUrl = $auth['apiUrl'];
+        list($this->profileId, $this->profileKey, $this->apiUrl) = $auth;
     }
 
-    public function postSale($cardNumber, \DateTime $cardExpDate, $amount)
+    public function postSale($cardNumber, $expirationMonth, $expirationYear, $amount)
     {
-        $ch = curl_init($this->getApiUrl());
-        curl_setopt_array($ch, array(
-            CURLOPT_RETURNTRANSFER => true,
-            CURLOPT_POST => true,
-            CURLOPT_POSTFIELDS => http_build_query(array(
-                'profile_id' => $this->getProfileId(),
-                'profile_key' => $this->getProfileKey(),
-                'card_number' => $cardNumber,
-                'card_exp_date' => $cardExpDate->format('my'),
-                'transaction_amount' => $amount,
-                'transaction_type' => 'D',
-                'invoice_number' => $this->generateInvoiceNumber(),
-            ))
-        ));
+        $sale = new Trident\TpgSale($this->profileId, $this->profileKey);
 
-        $res = curl_exec($ch);
-        curl_close($ch);
+        $sale->setTransactionData($cardNumber, $expirationMonth . $expirationYear, $amount);
+        $sale->execute();
 
-        parse_str($res, $resultingArray);
-        ladybug_dump($resultingArray);
-    }
-
-    private function generateInvoiceNumber($length = 10)
-    {
-        $base = array_merge(range(0, 9), range('a', 'z'), range('A', 'Z'));
-        shuffle($base);
-
-        $invoiceNumber = '';
-
-        while(strlen($invoiceNumber) < $length) {
-            $invoiceNumber .= $base[array_rand($base)];
-            shuffle($base);
+        if (!$sale->isApproved()) {
+            return false;
         }
 
-        return $invoiceNumber;
+
+        return $sale->ResponseFields['auth_code'];
     }
 }
