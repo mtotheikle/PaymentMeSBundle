@@ -2,6 +2,7 @@
 
 namespace ImmersiveLabs\PaymentMeSBundle\Plugin;
 
+use JMS\Payment\CoreBundle\Entity\FinancialTransaction;
 use JMS\Payment\CoreBundle\Model\FinancialTransactionInterface;
 use JMS\Payment\CoreBundle\Plugin\AbstractPlugin;
 
@@ -26,5 +27,10 @@ class MeSPlugin extends AbstractPlugin
     public function processes($name)
     {
         return 'payment_mes' === $name;
+    }
+
+    public function approveAndDeposit(FinancialTransaction $transaction, $retry)
+    {
+
     }
 }
