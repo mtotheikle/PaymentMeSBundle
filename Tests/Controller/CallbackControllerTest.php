@@ -13,14 +13,12 @@ use JMS\Payment\CoreBundle\Plugin\Exception\Action\VisitUrl;
 
 /**
  * Callback controller test
- *
  * @group payment-mes
  */
 class CallbackControllerTest extends ContainerAwareWebTestCase
 {
     /**
      * Test the the creation of a new payment
-     *
      * @return PaymentInstructionInterface
      */
     public function testNewPaymentInstruction()
@@ -28,9 +26,9 @@ class CallbackControllerTest extends ContainerAwareWebTestCase
         $form = $this->get('form.factory')->create('jms_choose_payment_method', null, array(
             'amount'   => 42,
             'currency' => 'EUR',
-            'default_method' => 'dotpay_direct',
+            'default_method' => 'payment_mes',
             'predefined_data' => array(
-                'dotpay_direct' => array(
+                'payment_mes' => array(
                     'lang'       => 'en',
                     'return_url' => 'http://test.com',
                 ),
@@ -38,7 +36,7 @@ class CallbackControllerTest extends ContainerAwareWebTestCase
         ));
 
         $form->bind(array(
-            'method' => 'dotpay_direct',
+            'method' => 'payment_mes',
         ));
 
         if (!$form->isValid()) {

@@ -25,6 +25,6 @@ class MeSPlugin extends AbstractPlugin
 
     public function processes($name)
     {
-        return 'MeS' === $name;
+        return 'payment_mes' === $name;
     }
 }
