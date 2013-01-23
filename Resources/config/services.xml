@@ -5,6 +5,14 @@
     xsi:schemaLocation="http://symfony.com/schema/dic/services http://symfony.com/schema/dic/services/services-1.0.xsd">
 
     <services>
+        <service id="mes_payment_gateway_service" class="ImmersiveLabs\PaymentMeSBundle\Client\MeSClient">
+            <argument type="collection">
+                <argument>%pg_profile_id%</argument>
+                <argument>%pg_profile_key%</argument>
+                <argument>%pg_host%</argument>
+            </argument>
+        </service>
+
         <service id="payment.plugin.mes" class="ImmersiveLabs\PaymentMeSBundle\Plugin\MeSPlugin">
             <argument>%payment.mes.pg_profile_id%</argument>
             <argument>%payment.mes.pg_profile_key%</argument>
