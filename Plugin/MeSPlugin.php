@@ -29,8 +29,8 @@ class MeSPlugin extends AbstractPlugin
         return 'payment_mes' === $name;
     }
 
-    public function approveAndDeposit(FinancialTransaction $transaction, $retry)
-    {
-
-    }
+//    public function approveAndDeposit(FinancialTransaction $transaction, $retry)
+//    {
+//
+//    }
 }
