@@ -6,7 +6,9 @@ use JMS\Payment\CoreBundle\Model\FinancialTransactionInterface;
 use JMS\Payment\CoreBundle\Plugin\AbstractPlugin;
 use JMS\Payment\CoreBundle\Entity\ExtendedData;
 use JMS\Payment\CoreBundle\Entity\Payment;
+use JMS\Payment\CoreBundle\Entity\PaymentInstruction;
 use JMS\Payment\CoreBundle\Entity\Credit;
+use Vespolina\Entity\Partner\PaymentProfile;
 
 class MeSPlugin extends AbstractPlugin
 {
@@ -113,13 +115,29 @@ class MeSPlugin extends AbstractPlugin
         /** @var \JMS\Payment\CoreBundle\Entity\Payment $payment */
         $payment = $transaction->getPayment();
 
-        $response = $this->client->postSale($data[self::PARAMS_CARD_NUMBER], $data[self::PARAMS_CARD_EXPIRATION_MONTH], $data[self::PARAMS_CARD_EXPIRATION_YEAR], $payment->getApprovingAmount());
+        if (isset($data[self::PARAMS_CARD_ID])) {
+            // then we pay using his card id
+            $response = $this->client->postSaleForStoredData($data[self::PARAMS_CARD_ID], $payment->getApprovingAmount());
+        } else {
+            $response = $this->client->postSale($data[self::PARAMS_CARD_NUMBER], $data[self::PARAMS_CARD_EXPIRATION_MONTH], $data[self::PARAMS_CARD_EXPIRATION_YEAR], $payment->getApprovingAmount());
+        }
 
         $transaction = $this->processResponse($transaction, $payment->getTargetAmount(), $response);
     }
 
+    /**
+     * @param \JMS\Payment\CoreBundle\Entity\ExtendedData $extendedData
+     * @return array
+     */
     public function convertExtendedData(ExtendedData $extendedData)
     {
+        if ($extendedData->has('cardId')) {
+
+            return array(
+                self::PARAMS_CARD_ID => $extendedData->get('cardId')
+            );
+        }
+
         return array(
             self::PARAMS_CARD_NUMBER => $extendedData->get('cardNumber'),
             self::PARAMS_CARD_EXPIRATION_MONTH => $extendedData->get('expirationMonth'),
@@ -156,12 +174,29 @@ class MeSPlugin extends AbstractPlugin
     {
         foreach ($payment->getTransactions() as $t) {
             /** @var FinancialTransactionInterface $t */
-
             if ($t->getId()) {
+
                 return $t;
             }
         }
 
         return null;
+    }
+
+    /**
+     * @param \JMS\Payment\CoreBundle\Entity\PaymentInstruction $instruction
+     * @return \Vespolina\Entity\Partner\PaymentProfile
+     */
+    public function storeData(PaymentInstruction $instruction)
+    {
+        $data = $this->convertExtendedData($instruction->getExtendedData());
+
+        $reference = $this->client->storeData($data[self::PARAMS_CARD_NUMBER], $data[self::PARAMS_CARD_EXPIRATION_MONTH], $data[self::PARAMS_CARD_EXPIRATION_YEAR]);
+
+        $paymentProfile = new PaymentProfile();
+        $paymentProfile->setReference($reference);
+        $paymentProfile->setLast4digits(substr($data[self::PARAMS_CARD_NUMBER], -4));
+
+        return $paymentProfile;
     }
 }

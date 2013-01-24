@@ -8,6 +8,7 @@ class MeSClient
 {
     const TXN_TYPE_SALE = 'sale';
     const TXN_TYPE_PRE_AUTH = 'pre-auth';
+    const TXN_TYPE_STOREDATA = 'store-data';
 
     protected $profileId;
     protected $profileKey;
@@ -107,6 +108,17 @@ class MeSClient
         if (!$txn->isApproved()) {
             return false;
         }
+
+        return $txn->ResponseFields['transaction_id'];
+    }
+
+    public function storeData($cardNumber, $expirationMonth, $expirationYear)
+    {
+        $txn = new Trident\TpgStoreData($this->profileId, $this->profileKey);
+        $txn->RequestFields['card_number'] = $cardNumber;
+        $txn->RequestFields['card_exp_date'] = $expirationMonth . $expirationYear;
+
+        $txn->execute();
 
         return $txn->ResponseFields['transaction_id'];
     }
