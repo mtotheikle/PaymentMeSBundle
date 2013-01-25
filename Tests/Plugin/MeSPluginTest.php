@@ -9,7 +9,7 @@ use JMS\Payment\CoreBundle\PluginController\Result;
 use JMS\Payment\CoreBundle\Model\FinancialTransactionInterface;
 use JMS\Payment\CoreBundle\Entity\Payment;
 use JMS\Payment\CoreBundle\Entity\Credit;
-
+use Vespolina\Entity\Partner\PaymentProfile;
 /**
  * @group mes-plugin
  */
@@ -67,6 +67,32 @@ class MeSPluginTest extends TestBaseManager {
     }
 
     /**
+     * @group mes-plugin-store
+     */
+    public function testStore()
+    {
+        $plugin = $this->getMESPaymentPlugin();
+
+        $paymentInstruction = $this->createPaymentInstruction();
+
+        $profile = $plugin->storeData($paymentInstruction);
+
+        $this->assertNotNull($profile->getReference());
+        $this->assertNotNull($profile->getLast4digits());
+
+        $paymentInstruction = $this->createPaymentInstruction($profile->getReference());
+        $payment = $this->createPayment($paymentInstruction);
+
+        $result = $this->getPaymentPluginController()->approveAndDeposit($payment->getId(), $payment->getTargetAmount());
+
+        /** @var FinancialTransactionInterface $ft  */
+        $ft = $result->getFinancialTransaction();
+
+        $this->assertEquals(Result::STATUS_SUCCESS, $result->getStatus());
+        $this->assertNotNull($ft->getReferenceNumber());
+    }
+
+    /**
      * @return \JMS\Payment\CoreBundle\Model\FinancialTransactionInterface
      */
     private function capture()
@@ -119,16 +145,20 @@ class MeSPluginTest extends TestBaseManager {
     /**
      * @return \JMS\Payment\CoreBundle\Entity\PaymentInstruction
      */
-    private function createPaymentInstruction()
+    private function createPaymentInstruction($cardReference = null)
     {
         $exp = $this->getSampleExpirationDate();
         $month = $exp->format('m');
         $year = $exp->format('y');
         $extendedData = new ExtendedData();
-        $extendedData->set('cardNumber', $this->getSampleCardNumber(), false, false);
-        $extendedData->set('cvv', $this->getSampleCvv(), false, false);
-        $extendedData->set('expirationMonth', $month, false, false);
-        $extendedData->set('expirationYear', $year, false, false);
+        if (empty($cardReference)) {
+            $extendedData->set('cardNumber', $this->getSampleCardNumber(), false, false);
+            $extendedData->set('cvv', $this->getSampleCvv(), false, false);
+            $extendedData->set('expirationMonth', $month, false, false);
+            $extendedData->set('expirationYear', $year, false, false);
+        } else {
+            $extendedData->set('cardId', $cardReference, false, false);
+        }
 
         $ins = new PaymentInstruction(50, 'USD', 'payment_mes', $extendedData);
         $this->getPaymentPluginController()->createPaymentInstruction($ins);
