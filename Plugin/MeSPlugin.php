@@ -185,7 +185,7 @@ class MeSPlugin extends AbstractPlugin
 
     /**
      * @param \JMS\Payment\CoreBundle\Entity\PaymentInstruction $instruction
-     * @return \Vespolina\Entity\Partner\PaymentProfile
+     * @return array
      */
     public function storeData(PaymentInstruction $instruction)
     {
@@ -193,10 +193,9 @@ class MeSPlugin extends AbstractPlugin
 
         $reference = $this->client->storeData($data[self::PARAMS_CARD_NUMBER], $data[self::PARAMS_CARD_EXPIRATION_MONTH], $data[self::PARAMS_CARD_EXPIRATION_YEAR]);
 
-        $paymentProfile = new PaymentProfile();
-        $paymentProfile->setReference($reference);
-        $paymentProfile->setLast4digits(substr($data[self::PARAMS_CARD_NUMBER], -4));
-
-        return $paymentProfile;
+        return array(
+            $reference,
+            substr($data[self::PARAMS_CARD_NUMBER], -4),
+        );
     }
 }

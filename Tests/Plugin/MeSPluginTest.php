@@ -75,12 +75,9 @@ class MeSPluginTest extends TestBaseManager {
 
         $paymentInstruction = $this->createPaymentInstruction();
 
-        $profile = $plugin->storeData($paymentInstruction);
+        list($reference, $last4Digits) = $plugin->storeData($paymentInstruction);
 
-        $this->assertNotNull($profile->getReference());
-        $this->assertNotNull($profile->getLast4digits());
-
-        $paymentInstruction = $this->createPaymentInstruction($profile->getReference());
+        $paymentInstruction = $this->createPaymentInstruction($reference);
         $payment = $this->createPayment($paymentInstruction);
 
         $result = $this->getPaymentPluginController()->approveAndDeposit($payment->getId(), $payment->getTargetAmount());
