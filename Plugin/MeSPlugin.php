@@ -115,7 +115,7 @@ class MeSPlugin extends AbstractPlugin
         /** @var \JMS\Payment\CoreBundle\Entity\Payment $payment */
         $payment = $transaction->getPayment();
 
-        if (isset($data[self::PARAMS_CARD_ID])) {
+        if (array_key_exists(self::PARAMS_CARD_ID, $data)) {
             // then we pay using his card id
             $response = $this->client->postSaleForStoredData($data[self::PARAMS_CARD_ID], $payment->getApprovingAmount());
         } else {
