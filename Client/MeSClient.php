@@ -28,6 +28,23 @@ class MeSClient
         return $this->adhocTxnExecute(self::TXN_TYPE_SALE, $cardNumber, $expirationMonth, $expirationYear, $amount);
     }
 
+    public function verifyCard($cardNumber, $expirationMonth, $expirationYear, $streetAddress, $zip)
+    {
+        $request = new Trident\TpgTransaction($this->profileId, $this->profileKey);
+        $request->RequestFields = array_merge($request->RequestFields, array(
+           'card_number' => $cardNumber,
+           'card_exp_date' => $expirationMonth . $expirationYear,
+           'cardholder_street_address' => $streetAddress,
+           'cardholder_zipcode' => $zip,
+           'transaction_type' => 'A',
+           'transaction_amount' => 0.00
+        ));
+
+        $request->execute();
+
+        return ($request->ResponseFields['auth_response_text'] == 'Card OK');
+    }
+
     public function postSaleForStoredData($cardId, $amount)
     {
         return $this->storedDataTxnExecute(self::TXN_TYPE_SALE, $cardId, $amount);

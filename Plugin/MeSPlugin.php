@@ -198,4 +198,12 @@ class MeSPlugin extends AbstractPlugin
             substr($data[self::PARAMS_CARD_NUMBER], -4),
         );
     }
+
+    /**
+     * @return bool|\ImmersiveLabs\PaymentMeSBundle\Client\MeSClient
+     */
+    public function getClient()
+    {
+        return $this->client;
+    }
 }
