@@ -47,6 +47,9 @@ class MeSPlugin extends AbstractPlugin
         $response = $this->client->postRefund($txnId);
 
         $transaction = $this->processResponse($transaction, 0, $response);
+
+        ladybug_dump($transaction);
+        return $transaction;
     }
 
     /**
