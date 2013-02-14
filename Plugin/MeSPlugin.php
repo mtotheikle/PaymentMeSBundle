@@ -48,7 +48,6 @@ class MeSPlugin extends AbstractPlugin
 
         $transaction = $this->processResponse($transaction, 0, $response);
 
-        ladybug_dump($transaction);
         return $transaction;
     }
 

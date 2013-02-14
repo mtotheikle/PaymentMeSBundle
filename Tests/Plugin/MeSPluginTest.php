@@ -28,7 +28,6 @@ class MeSPluginTest extends TestBaseManager {
      */
     public function testRefund()
     {
-        $this->markTestIncomplete('?');
         $ft = $this->capture();
 
         /** @var Payment $payment  */
