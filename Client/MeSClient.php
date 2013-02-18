@@ -40,7 +40,7 @@ class MeSClient
             'card_number'               => $cardInformation['cardNumber'],
             'card_exp_date'             => $cardInformation['expirationMonth'] . $cardInformation['expirationYear'],
             'transaction_amount'        => 1.00,
-            'cvv2'                      => $cardInformation['cvv'],
+            'cvv2'                      => ($cardInformation['cvv']) ? : '***',
             'cardholder_street_address' => $cardInformation['streetAddress'],
             'cardholder_zipcode'        => $cardInformation['zip'],
         );
