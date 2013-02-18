@@ -10,6 +10,9 @@ class MeSClient
     const TXN_TYPE_PRE_AUTH = 'pre-auth';
     const TXN_TYPE_STOREDATA = 'store-data';
 
+    const NO_ERROR = '000';
+    const CARD_NUMBER_ERROR = '014';
+
     protected $profileId;
     protected $profileKey;
     protected $apiUrl;
@@ -44,7 +47,7 @@ class MeSClient
 
         $request->execute();
 
-        if ($request->ResponseFields['error_code'] == '000' && $request->ResponseFields['auth_response_text'] != 'No Match') {
+        if ($request->ResponseFields['error_code'] == self::NO_ERROR && $request->ResponseFields['auth_response_text'] != 'No Match') {
             $transactionId = $request->ResponseFields['transaction_id'];
 
             $voidTransaction = new Trident\TpgVoid($this->profileId, $this->profileKey, $transactionId);
@@ -52,7 +55,6 @@ class MeSClient
 
             return true;
         }
-
 
         // otherwise we return an array with errors (check Payment MeS Gateway PDF page: 39)
         $errors = array(
@@ -62,7 +64,7 @@ class MeSClient
             'cardError' => false,
         );
 
-        if ($request->ResponseFields['error_code'] == '014') {
+        if ($request->ResponseFields['error_code'] == self::CARD_NUMBER_ERROR) {
             $errors['cardError'] = true;
 
             return $errors;
@@ -179,7 +181,7 @@ class MeSClient
 
         $txn->execute();
 
-        if ($txn->ResponseFields['error_code'] == '000') {
+        if ($txn->ResponseFields['error_code'] == self::NO_ERROR) {
 
             return $txn->ResponseFields['transaction_id'];
         }

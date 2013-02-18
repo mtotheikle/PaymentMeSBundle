@@ -2,6 +2,7 @@
 
 namespace ImmersiveLabs\PaymentMeSBundle\Plugin;
 
+use ImmersiveLabs\PaymentMeSBundle\Client\MeSClient;
 use JMS\Payment\CoreBundle\Model\FinancialTransactionInterface;
 use JMS\Payment\CoreBundle\Plugin\AbstractPlugin;
 use JMS\Payment\CoreBundle\Entity\ExtendedData;
@@ -21,7 +22,7 @@ class MeSPlugin extends AbstractPlugin
     const PARAMS_CARD_CVV = 'cardCvv';
     const PARAMS_CARD_ID = 'cardId';
 
-    public function __construct($client)
+    public function __construct(MeSClient $client)
     {
         $this->client = $client;
     }
