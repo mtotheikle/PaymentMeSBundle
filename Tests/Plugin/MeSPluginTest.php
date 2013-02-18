@@ -2,25 +2,42 @@
 
 namespace ImmersiveLabs\PaymentMeSBundle\Tests\Plugin;
 
-use ImmersiveLabs\CaraCore\Tests\TestBaseManager;
 use JMS\Payment\CoreBundle\Entity\PaymentInstruction;
+use ImmersiveLabs\PaymentMeSBundle\Tests\BaseTestCase;
 use JMS\Payment\CoreBundle\Entity\ExtendedData;
 use JMS\Payment\CoreBundle\PluginController\Result;
 use JMS\Payment\CoreBundle\Model\FinancialTransactionInterface;
 use JMS\Payment\CoreBundle\Entity\Payment;
 use JMS\Payment\CoreBundle\Entity\Credit;
 use Vespolina\Entity\Partner\PaymentProfile;
-/**
- * @group mes-plugin
- */
-class MeSPluginTest extends TestBaseManager {
 
+/**
+ * @group mes
+ */
+class MeSPluginTest extends BaseTestCase
+{
     /**
      * @group mes-plugin-capture
      */
     public function testCapture()
     {
         $this->capture();
+    }
+
+    /**
+     * @return \JMS\Payment\CoreBundle\PluginController\EntityPluginController
+     */
+    public function getPaymentPluginController()
+    {
+        return $this->container->get('payment.plugin_controller');
+    }
+
+    /**
+     * @return \ImmersiveLabs\PaymentMeSBundle\Plugin\MeSPlugin
+     */
+    public function getMESPaymentPlugin()
+    {
+        return $this->container->get('payment.plugin.mes');
     }
 
     /**

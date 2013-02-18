@@ -10,14 +10,18 @@ class MeSClient
     const TXN_TYPE_PRE_AUTH = 'pre-auth';
     const TXN_TYPE_STOREDATA = 'store-data';
 
+    const NO_ERROR = '000';
+    const CARD_NUMBER_ERROR = '014';
+
     protected $profileId;
     protected $profileKey;
     protected $apiUrl;
 
     protected $txnMappings = array(
-        self::TXN_TYPE_SALE => 'ImmersiveLabs\PaymentMeSBundle\PaymentGateway\Trident\TpgSale',
+        self::TXN_TYPE_SALE     => 'ImmersiveLabs\PaymentMeSBundle\PaymentGateway\Trident\TpgSale',
         self::TXN_TYPE_PRE_AUTH => 'ImmersiveLabs\PaymentMeSBundle\PaymentGateway\Trident\TpgPreAuth'
     );
+
     public function __construct($auth)
     {
         list($this->profileId, $this->profileKey, $this->apiUrl) = $auth;
@@ -28,21 +32,61 @@ class MeSClient
         return $this->adhocTxnExecute(self::TXN_TYPE_SALE, $cardNumber, $expirationMonth, $expirationYear, $amount);
     }
 
-    public function verifyCard($cardNumber, $expirationMonth, $expirationYear, $streetAddress, $zip)
+    public function verifyCard(array $cardInformation)
     {
-        $request = new Trident\TpgTransaction($this->profileId, $this->profileKey);
+        $request = new Trident\TpgPreAuth($this->profileId, $this->profileKey);
+
         $request->RequestFields = array(
-           'card_number' => $cardNumber,
-           'card_exp_date' => $expirationMonth . $expirationYear,
-           'cardholder_street_address' => $streetAddress,
-           'cardholder_zipcode' => $zip,
-           'transaction_type' => 'A',
-           'transaction_amount' => 0.00
+            'card_number'               => $cardInformation['cardNumber'],
+            'card_exp_date'             => $cardInformation['expirationMonth'] . $cardInformation['expirationYear'],
+            'transaction_amount'        => 1.00,
+            'cvv2'                      => $cardInformation['cvv'],
+            'cardholder_street_address' => $cardInformation['streetAddress'],
+            'cardholder_zipcode'        => $cardInformation['zip'],
         );
 
         $request->execute();
 
-        return ($request->ResponseFields['auth_response_text'] == 'Card Ok');
+        if ($request->ResponseFields['error_code'] == self::NO_ERROR && $request->ResponseFields['auth_response_text'] != 'No Match') {
+            $transactionId = $request->ResponseFields['transaction_id'];
+
+            $voidTransaction = new Trident\TpgVoid($this->profileId, $this->profileKey, $transactionId);
+            $voidTransaction->execute();
+
+            return true;
+        }
+
+        // otherwise we return an array with errors (check Payment MeS Gateway PDF page: 39)
+        $errors = array(
+            'cvv' => true,
+            'zip' => true,
+            'streetAddress' => true,
+            'cardError' => false,
+        );
+
+        if ($request->ResponseFields['error_code'] == self::CARD_NUMBER_ERROR) {
+            $errors['cardError'] = true;
+
+            return $errors;
+        }
+
+        if (isset($request->ResponseFields['cvv2_result'])) {
+            if ($request->ResponseFields['cvv2_result'] == 'M') {
+                $errors['cvv'] = false;
+            }
+        }
+
+        if (isset($request->ResponseFields['avs_result'])) {
+            if ($request->ResponseFields['avs_result'] == 'M' || $request->ResponseFields['avs_result'] == 'Y') {
+                $errors['streetAddress'] = $errors['zip'] = false;
+            } elseif ($request->ResponseFields['avs_result'] == 'Z') {
+                $errors['zip'] = false;
+            } elseif ($request->ResponseFields['avs_result'] == 'A') {
+                $errors['streetAddress'] = $errors['zip'] = false;
+            }
+        }
+
+        return $errors;
     }
 
     public function postSaleForStoredData($cardId, $amount)
@@ -137,6 +181,11 @@ class MeSClient
 
         $txn->execute();
 
-        return $txn->ResponseFields['transaction_id'];
+        if ($txn->ResponseFields['error_code'] == self::NO_ERROR) {
+
+            return $txn->ResponseFields['transaction_id'];
+        }
+
+        return false;
     }
 }
