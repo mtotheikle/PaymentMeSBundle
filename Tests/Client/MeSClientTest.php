@@ -5,7 +5,7 @@ namespace ImmersiveLabs\PaymentMeSBundle\Tests\Client;
 use ImmersiveLabs\PaymentMeSBundle\Tests\BaseTestCase;
 
 /**
- * @group mesclient
+ * @group mes
  */
 class MeSClientTest extends BaseTestCase
 {
