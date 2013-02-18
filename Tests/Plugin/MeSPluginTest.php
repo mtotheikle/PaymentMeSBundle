@@ -14,8 +14,8 @@ use Vespolina\Entity\Partner\PaymentProfile;
 /**
  * @group mes
  */
-class MeSPluginTest extends BaseTestCase {
-
+class MeSPluginTest extends BaseTestCase
+{
     /**
      * @group mes-plugin-capture
      */
