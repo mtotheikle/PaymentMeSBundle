@@ -12,6 +12,7 @@ class MeSClient
 
     const NO_ERROR = '000';
     const CARD_NUMBER_ERROR = '014';
+    const CODE_CARD_OK = '085';
 
     protected $profileId;
     protected $profileKey;
@@ -34,41 +35,31 @@ class MeSClient
 
     public function verifyCard(array $cardInformation)
     {
-        $request = new Trident\TpgPreAuth($this->profileId, $this->profileKey);
+        $request = new Trident\TpgTransaction($this->profileId, $this->profileKey);
 
         $request->RequestFields = array(
             'card_number'               => $cardInformation['cardNumber'],
             'card_exp_date'             => $cardInformation['expirationMonth'] . $cardInformation['expirationYear'],
-            'transaction_amount'        => 1.00,
-            'cvv2'                      => ($cardInformation['cvv']) ? : '***',
+            'transaction_amount'        => 0.00,
+            'transaction_type'          => 'A',
+            'cvv2'                      => $cardInformation['cvv'],
             'cardholder_street_address' => $cardInformation['streetAddress'],
             'cardholder_zipcode'        => $cardInformation['zip'],
         );
 
         $request->execute();
 
-        if ($request->ResponseFields['error_code'] == self::NO_ERROR && $request->ResponseFields['auth_response_text'] != 'No Match') {
-            $transactionId = $request->ResponseFields['transaction_id'];
-
-            $voidTransaction = new Trident\TpgVoid($this->profileId, $this->profileKey, $transactionId);
-            $voidTransaction->execute();
+        if ($request->ResponseFields['error_code'] == self::CODE_CARD_OK) {
 
             return true;
         }
 
-        // otherwise we return an array with errors (check Payment MeS Gateway PDF page: 39)
         $errors = array(
             'cvv' => true,
             'zip' => true,
             'streetAddress' => true,
-            'cardError' => false,
+            'cardError' => true,
         );
-
-        if ($request->ResponseFields['error_code'] == self::CARD_NUMBER_ERROR) {
-            $errors['cardError'] = true;
-
-            return $errors;
-        }
 
         if (isset($request->ResponseFields['cvv2_result'])) {
             if ($request->ResponseFields['cvv2_result'] == 'M') {
@@ -77,12 +68,12 @@ class MeSClient
         }
 
         if (isset($request->ResponseFields['avs_result'])) {
-            if ($request->ResponseFields['avs_result'] == 'M' || $request->ResponseFields['avs_result'] == 'Y') {
+            $result = $request->ResponseFields['avs_result'];
+
+            if (in_array($result, array('M', 'Y', 'A'))) {
                 $errors['streetAddress'] = $errors['zip'] = false;
-            } elseif ($request->ResponseFields['avs_result'] == 'Z') {
+            } elseif ($result == 'Z') {
                 $errors['zip'] = false;
-            } elseif ($request->ResponseFields['avs_result'] == 'A') {
-                $errors['streetAddress'] = $errors['zip'] = false;
             }
         }
 
