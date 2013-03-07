@@ -21,6 +21,8 @@ class MeSExamTest extends BaseTestCase
 
     public function testExam()
     {
+        $this->markTestSkipped('This should be run independently');
+        
         $cardNumbers = array(
             '4012301230123010',
             '5123012301230120',
@@ -34,6 +36,7 @@ class MeSExamTest extends BaseTestCase
         foreach ($cardNumbers as $cardNumber) {
             $request = new Trident\TpgSale($profileId, $profileKey);
 
+            $invoice = uniqid();
             $request->RequestFields = array(
                 'card_number'               => $cardNumber,
                 'card_exp_date'             => '072017',
@@ -41,14 +44,18 @@ class MeSExamTest extends BaseTestCase
                 'cvv2'                      => '123',
                 'cardholder_street_address' => '123',
                 'cardholder_zipcode'        => '55555',
-                'invoice_number'            => uniqid()
+                'invoice_number'            => $invoice
             );
 
             $request->execute();
 
-            ladybug_dump(sprintf('Results for %s', $cardNumber));
+            $refundRequest = new Trident\TpgRefund($profileId, $profileKey, $request->ResponseFields['transaction_id']);
+            $refundRequest->execute();
 
-            ladybug_dump($request->ResponseFields);
+            echo sprintf("Card number : %s \n", $cardNumber);
+            echo sprintf("Invoice : %s \n", $invoice);
+            echo sprintf("Sale Transaction Id : %s \n", $request->ResponseFields['transaction_id']);
+            echo sprintf("Refund Transaction Id : %s \n\n\n", $refundRequest->ResponseFields['transaction_id']);
         }
     }
 }
