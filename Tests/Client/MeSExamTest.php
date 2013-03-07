@@ -3,74 +3,52 @@
 namespace ImmersiveLabs\PaymentMeSBundle\Tests\Client;
 
 use ImmersiveLabs\PaymentMeSBundle\Tests\BaseTestCase;
+use ImmersiveLabs\PaymentMeSBundle\Client\MeSClient;
+use ImmersiveLabs\PaymentMeSBundle\PaymentGateway\Trident;
 
 /**
  * @group exam
  */
 class MeSExamTest extends BaseTestCase
 {
+    /** @var MeSClient */
+    protected $mesClient;
+
     public function setUp()
     {
         parent::setUp();
     }
 
-    /**
-     * @dataProvider provider
-     */
-    public function testExamTPG($inputCardNumber, $expectedInvoice, $expectedTransactionId,  $expectedRefundInvoice, $expectedRefundTransactionId)
+    public function testExam()
     {
-        $card = array(
-            'cardNumber' => 'dummy',
-            'expirationMonth' => '05',
-            'expirationYear' => '2017',
-            'cvv' => '123',
-            'streetAddress' => '123',
-            'zip' => '55555',
+        $cardNumbers = array(
+            '4012301230123010',
+            '5123012301230120',
+            '349999999999991',
+            '6011011231231235'
         );
 
-        $card['cardNumber'] = $inputCardNumber;
+        $profileId = $this->container->getParameter('pg_profile_id');
+        $profileKey = $this->container->getParameter('pg_profile_key');
 
-        // change cg_profile_id to 94100011317700000015
-        // @todo ^^
+        foreach ($cardNumbers as $cardNumber) {
+            $request = new Trident\TpgSale($profileId, $profileKey);
 
-        // verifies card
-        $result = $this->mesClient->verifyCard($card);
-        $this->assertTrue(is_array($result));
-        $this->assertTrue($result['cvv']);
-        $this->assertTrue($result['streetAddress']);
-        $this->assertTrue($result['zip']);
+            $request->RequestFields = array(
+                'card_number'               => $cardNumber,
+                'card_exp_date'             => '072017',
+                'transaction_amount'        => 0.03,
+                'cvv2'                      => '123',
+                'cardholder_street_address' => '123',
+                'cardholder_zipcode'        => '55555',
+                'invoice_number'            => uniqid()
+            );
 
-        // actual sale transaction
-        $actual = $this->mesClient->postSale(
-            $card['cardNumber'],
-            $card['expirationMonth'],
-            $card['expirationYear'],
-            0.03
-        );
+            $request->execute();
 
-        ladybug_dump($actual);
-        // uncomment after getting results for invoice and transactionId
-        //$this->assertEquals($expectedInvoice, $actual['invoice']);
-        //$this->assertEquals($expectedInvoice, $actual['transactionId']);
+            ladybug_dump(sprintf('Results for %s', $cardNumber));
 
-        // actual refund transaction
-        $actualRefund = $this->mesClient->postRefund(
-            $actual['transactionId']
-        );
-
-        ladybug_dump($actualRefund);
-        // uncomment after getting results for invoice and transactionId
-        //$this->assertEquals($expectedRefundInvoice, $actualRefund['invoice']);
-        //$this->assertEquals($expectedRefundTransactionId, $actualRefund['transactionId']);
-    }
-
-    public function provider()
-    {
-        return array(
-            array('4012301230123010', 0, 0, 0, 0),
-            array('5123012301230120', 0, 0, 0, 0),
-            array('349999999999991', 0, 0, 0, 0),
-            array('6011011231231235', 0, 0, 0, 0)
-        );
+            ladybug_dump($request->ResponseFields);
+        }
     }
 }
