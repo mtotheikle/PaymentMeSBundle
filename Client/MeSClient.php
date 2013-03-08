@@ -30,7 +30,20 @@ class MeSClient
 
     public function postSale($cardNumber, $expirationMonth, $expirationYear, $amount)
     {
-        return $this->adhocTxnExecute(self::TXN_TYPE_SALE, $cardNumber, $expirationMonth, $expirationYear, $amount);
+        $transaction = new Trident\TpgSale($this->profileId, $this->profileKey);
+
+        $transaction->setTransactionData($cardNumber, $expirationMonth . $expirationYear, $amount);
+        $transaction->execute();
+
+        return $transaction;
+    }
+
+    public function postRefund($transactionId)
+    {
+        $transaction = new Trident\TpgRefund($this->profileId, $this->profileKey, $transactionId);
+        $transaction->execute();
+
+        return $transaction;
     }
 
     public function verifyCard(array $cardInformation)
@@ -118,18 +131,6 @@ class MeSClient
         }
 
         return $void->ResponseFields['transaction_id'];
-    }
-
-    public function postRefund($transactionId)
-    {
-        $refund = new Trident\TpgRefund($this->profileId, $this->profileKey, $transactionId);
-        $refund->execute();
-
-        if (!$refund->isApproved()) {
-            return false;
-        }
-
-        return $refund->ResponseFields['transaction_id'];
     }
 
     protected function storedDataTxnExecute($txnType, $cardId, $amount)

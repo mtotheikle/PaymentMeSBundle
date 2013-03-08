@@ -3,74 +3,38 @@
 namespace ImmersiveLabs\PaymentMeSBundle\Tests\Client;
 
 use ImmersiveLabs\PaymentMeSBundle\Tests\BaseTestCase;
+use ImmersiveLabs\PaymentMeSBundle\Client\MeSClient;
 
 /**
  * @group exam
  */
 class MeSExamTest extends BaseTestCase
 {
+    /** @var MeSClient */
+    protected $mesClient;
+
     public function setUp()
     {
         parent::setUp();
     }
 
-    /**
-     * @dataProvider provider
-     */
-    public function testExamTPG($inputCardNumber, $expectedInvoice, $expectedTransactionId,  $expectedRefundInvoice, $expectedRefundTransactionId)
+    public function testExam()
     {
-        $card = array(
-            'cardNumber' => 'dummy',
-            'expirationMonth' => '05',
-            'expirationYear' => '2017',
-            'cvv' => '123',
-            'streetAddress' => '123',
-            'zip' => '55555',
+        $cardNumbers = array(
+            '4012301230123010',
+            '5123012301230120',
+            '349999999999991',
+            '6011011231231235'
         );
 
-        $card['cardNumber'] = $inputCardNumber;
+        foreach ($cardNumbers as $cardNumber) {
+            ladybug_dump(sprintf('Results for %s', $cardNumber));
+            $result = $this->mesClient->postSale($cardNumber, '05', '2017', 0.03);
 
-        // change cg_profile_id to 94100011317700000015
-        // @todo ^^
+            ladybug_dump($result->ResponseFields);
 
-        // verifies card
-        $result = $this->mesClient->verifyCard($card);
-        $this->assertTrue(is_array($result));
-        $this->assertTrue($result['cvv']);
-        $this->assertTrue($result['streetAddress']);
-        $this->assertTrue($result['zip']);
-
-        // actual sale transaction
-        $actual = $this->mesClient->postSale(
-            $card['cardNumber'],
-            $card['expirationMonth'],
-            $card['expirationYear'],
-            0.03
-        );
-
-        ladybug_dump($actual);
-        // uncomment after getting results for invoice and transactionId
-        //$this->assertEquals($expectedInvoice, $actual['invoice']);
-        //$this->assertEquals($expectedInvoice, $actual['transactionId']);
-
-        // actual refund transaction
-        $actualRefund = $this->mesClient->postRefund(
-            $actual['transactionId']
-        );
-
-        ladybug_dump($actualRefund);
-        // uncomment after getting results for invoice and transactionId
-        //$this->assertEquals($expectedRefundInvoice, $actualRefund['invoice']);
-        //$this->assertEquals($expectedRefundTransactionId, $actualRefund['transactionId']);
-    }
-
-    public function provider()
-    {
-        return array(
-            array('4012301230123010', 0, 0, 0, 0),
-            array('5123012301230120', 0, 0, 0, 0),
-            array('349999999999991', 0, 0, 0, 0),
-            array('6011011231231235', 0, 0, 0, 0)
-        );
+            $result = $this->mesClient->postRefund($result->ResponseFields['transaction_id']);
+            ladybug_dump($result->ResponseFields);
+        }
     }
 }
