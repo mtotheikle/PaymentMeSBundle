@@ -21,6 +21,8 @@ class MeSExamTest extends BaseTestCase
 
     public function testExam()
     {
+        $this->markTestSkipped('This should be run independently');
+        
         $cardNumbers = array(
             '4012301230123010',
             '5123012301230120',
