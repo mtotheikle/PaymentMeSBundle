@@ -4,6 +4,7 @@ namespace ImmersiveLabs\PaymentMeSBundle\Tests\Client;
 
 use ImmersiveLabs\PaymentMeSBundle\Tests\BaseTestCase;
 use ImmersiveLabs\PaymentMeSBundle\Client\MeSClient;
+use ImmersiveLabs\PaymentMeSBundle\PaymentGateway\Trident;
 
 /**
  * @group exam
@@ -27,14 +28,27 @@ class MeSExamTest extends BaseTestCase
             '6011011231231235'
         );
 
+        $profileId = $this->container->getParameter('pg_profile_id');
+        $profileKey = $this->container->getParameter('pg_profile_key');
+
         foreach ($cardNumbers as $cardNumber) {
+            $request = new Trident\TpgSale($profileId, $profileKey);
+
+            $request->RequestFields = array(
+                'card_number'               => $cardNumber,
+                'card_exp_date'             => '072017',
+                'transaction_amount'        => 0.03,
+                'cvv2'                      => '123',
+                'cardholder_street_address' => '123',
+                'cardholder_zipcode'        => '55555',
+                'invoice_number'            => uniqid()
+            );
+
+            $request->execute();
+
             ladybug_dump(sprintf('Results for %s', $cardNumber));
-            $result = $this->mesClient->postSale($cardNumber, '05', '2017', 0.03);
 
-            ladybug_dump($result->ResponseFields);
-
-            $result = $this->mesClient->postRefund($result->ResponseFields['transaction_id']);
-            ladybug_dump($result->ResponseFields);
+            ladybug_dump($request->ResponseFields);
         }
     }
 }
