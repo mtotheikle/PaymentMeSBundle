@@ -39,11 +39,11 @@ class MeSExamTest extends BaseTestCase
             $invoice = uniqid();
             $request->RequestFields = array(
                 'card_number'               => $cardNumber,
-                'card_exp_date'             => '072017',
+                'card_exp_date'             => '0717',
                 'transaction_amount'        => 0.03,
                 'cvv2'                      => '123',
                 'cardholder_street_address' => '123',
-                'cardholder_zipcode'        => '55555',
+                'cardholder_zip'            => '55555',
                 'invoice_number'            => $invoice
             );
 
