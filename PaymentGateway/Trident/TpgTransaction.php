@@ -174,5 +174,13 @@ class TpgTransaction
         $this->RequestFields['merchant_category_code'] = $mcc;
         $this->RequestFields['merchant_phone'] = $phone;
     }
+
+    public function __toString()
+    {
+        if (array_key_exists('transaction_id', $this->ResponseFields)) {
+
+            return $this->ResponseFields['transaction_id'];
+        }
+    }
 }
 

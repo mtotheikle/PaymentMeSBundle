@@ -118,7 +118,7 @@ class MeSClient
             return false;
         }
 
-        return $settle->ResponseFields['transaction_id'];
+        return $settle;
     }
 
     public function postVoid($transactionId)
@@ -130,7 +130,7 @@ class MeSClient
             return false;
         }
 
-        return $void->ResponseFields['transaction_id'];
+        return $void;
     }
 
     protected function storedDataTxnExecute($txnType, $cardId, $amount)
@@ -146,7 +146,7 @@ class MeSClient
             return false;
         }
 
-        return $txn->ResponseFields['transaction_id'];
+        return $txn;
     }
 
     protected function adhocTxnExecute($txnType, $cardNumber, $expirationMonth, $expirationYear, $amount)
@@ -162,7 +162,7 @@ class MeSClient
             return false;
         }
 
-        return $txn->ResponseFields['transaction_id'];
+        return $txn;
     }
 
     public function storeData($cardNumber, $expirationMonth, $expirationYear)
