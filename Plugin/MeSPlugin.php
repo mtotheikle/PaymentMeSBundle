@@ -3,6 +3,7 @@
 namespace ImmersiveLabs\PaymentMeSBundle\Plugin;
 
 use ImmersiveLabs\PaymentMeSBundle\Client\MeSClient;
+use ImmersiveLabs\PaymentMeSBundle\PaymentGateway\Trident\TpgTransaction;
 use JMS\Payment\CoreBundle\Model\FinancialTransactionInterface;
 use JMS\Payment\CoreBundle\Plugin\AbstractPlugin;
 use JMS\Payment\CoreBundle\Entity\ExtendedData;
@@ -157,7 +158,7 @@ class MeSPlugin extends AbstractPlugin
      */
     private function processResponse(FinancialTransactionInterface $transaction, $amount, $response)
     {
-        if ($response === false) {
+        if (($response instanceof TpgTransaction) && !$response->isApproved()) {
             return $transaction->setResponseCode(static::REASON_CODE_INVALID);
         }
 
