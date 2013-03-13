@@ -64,14 +64,19 @@ class MeSClient
 
         if ($request->ResponseFields['error_code'] == self::CODE_CARD_OK) {
 
-            return true;
+            return array(
+                'cvv'           => false,
+                'zip'           => false,
+                'streetAddress' => false,
+                'cardError'     => false
+            );
         }
 
         $errors = array(
-            'cvv' => true,
-            'zip' => true,
+            'cvv'           => true,
+            'zip'           => true,
             'streetAddress' => true,
-            'cardError' => true,
+            'cardError'     => true,
         );
 
         if (isset($request->ResponseFields['cvv2_result'])) {
