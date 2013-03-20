@@ -14,6 +14,9 @@ class MeSClientTest extends BaseTestCase
         parent::setUp();
     }
 
+    /**
+     * @group test-verify-card
+     */
     public function testVerifyCard()
     {
         $card = array(
@@ -27,7 +30,9 @@ class MeSClientTest extends BaseTestCase
 
         $result = $this->mesClient->verifyCard($card);
 
-        $this->assertTrue($result);
+        foreach ($result as $key => $value) {
+            $this->assertFalse($value);
+        }
 
         $card['cardNumber'] = '4111111111111112';
         $result = $this->mesClient->verifyCard($card);
