@@ -49,16 +49,8 @@ class MeSClient
     public function verifyCard(array $cardInformation)
     {
         $request = new Trident\TpgTransaction($this->profileId, $this->profileKey);
-
-        $request->RequestFields = array(
-            'card_number'               => $cardInformation['cardNumber'],
-            'card_exp_date'             => $cardInformation['expirationMonth'] . $cardInformation['expirationYear'],
-            'transaction_amount'        => 0.00,
-            'transaction_type'          => 'A',
-            'cvv2'                      => $cardInformation['cvv'],
-            'cardholder_street_address' => $cardInformation['streetAddress'],
-            'cardholder_zipcode'        => $cardInformation['zip'],
-        );
+        $request->setTransactionData($cardInformation['cardNumber'], $cardInformation['expirationMonth'] . $cardInformation['expirationYear']);
+        $request->setAvsRequest($cardInformation['streetAddress'], $cardInformation['zip']);
 
         $request->execute();
 
