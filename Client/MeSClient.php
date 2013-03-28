@@ -31,9 +31,13 @@ class MeSClient
     public function postSale($cardNumber, $expirationMonth, $expirationYear, $amount)
     {
         $transaction = new Trident\TpgSale($this->profileId, $this->profileKey);
-
+        $transaction->setHost($this->apiUrl);
         $transaction->setTransactionData($cardNumber, $expirationMonth . $expirationYear, $amount);
         $transaction->execute();
+
+        if (!$transaction->isApproved()) {
+            return false;
+        }
 
         return $transaction;
     }
@@ -41,7 +45,12 @@ class MeSClient
     public function postRefund($transactionId)
     {
         $transaction = new Trident\TpgRefund($this->profileId, $this->profileKey, $transactionId);
+        $transaction->setHost($this->apiUrl);
         $transaction->execute();
+
+        if (!$transaction->isApproved()) {
+            return false;
+        }
 
         return $transaction;
     }
@@ -49,8 +58,10 @@ class MeSClient
     public function verifyCard(array $cardInformation)
     {
         $request = new Trident\TpgTransaction($this->profileId, $this->profileKey);
+        $request->setHost($this->apiUrl);
         $request->setTransactionData($cardInformation['cardNumber'], $cardInformation['expirationMonth'] . $cardInformation['expirationYear']);
         $request->setAvsRequest($cardInformation['streetAddress'], $cardInformation['zip']);
+        $request->setRequestField('cvv2', $cardInformation['cvv']);
 
         $request->execute();
 
@@ -108,7 +119,7 @@ class MeSClient
     public function postSettle($transactionId, $amount)
     {
         $settle = new Trident\TpgSettle($this->profileId, $this->profileKey, $transactionId, $amount);
-
+        $settle->setHost($this->apiUrl);
         $settle->execute();
 
         if (!$settle->isApproved()) {
@@ -121,6 +132,7 @@ class MeSClient
     public function postVoid($transactionId)
     {
         $void = new Trident\TpgVoid($this->profileId, $this->profileKey, $transactionId);
+        $void->setHost($this->apiUrl);
         $void->execute();
 
         if (!$void->isApproved()) {
@@ -135,7 +147,7 @@ class MeSClient
         $txnClass = $this->txnMappings[$txnType];
 
         $txn = new $txnClass($this->profileId, $this->profileKey);
-
+        $txn->setHost($this->apiUrl);
         $txn->setStoredData($cardId, $amount);
         $txn->execute();
 
@@ -151,7 +163,7 @@ class MeSClient
         $txnClass = $this->txnMappings[$txnType];
 
         $txn = new $txnClass($this->profileId, $this->profileKey);
-
+        $txn->setHost($this->apiUrl);
         $txn->setTransactionData($cardNumber, $expirationMonth . $expirationYear, $amount);
         $txn->execute();
 
@@ -165,6 +177,7 @@ class MeSClient
     public function storeData($cardNumber, $expirationMonth, $expirationYear)
     {
         $txn = new Trident\TpgStoreData($this->profileId, $this->profileKey);
+        $txn->setHost($this->apiUrl);
         $txn->RequestFields['card_number'] = $cardNumber;
         $txn->RequestFields['card_exp_date'] = $expirationMonth . $expirationYear;
 
